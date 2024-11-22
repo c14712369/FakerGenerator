@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台灣居民假身分產生器</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container my-5">
+        <h1 class="text-center mb-4">台灣居民假身分產生器</h1>
+
+        <div class="row">
+            <!-- 左側區域：選擇生成條件和按鈕 -->
+            <div class="col-md-6">
+                <div class="card shadow p-4 mb-4">
+                    <h3 class="card-title">選擇生成條件</h3>
+                    <form id="formInputs" class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label">選擇證件類型</label>
+                            <div class="d-flex flex-wrap">
+                                <div class="form-check me-3">
+                                    <input class="form-check-input" type="radio" name="idType" value="身分證" checked>
+                                    <label class="form-check-label">身分證</label>
+                                </div>
+                                <div class="form-check me-3">
+                                    <input class="form-check-input" type="radio" name="idType" value="舊式居留證">
+                                    <label class="form-check-label">舊式居留證</label>
+                                </div>
+                                <div class="form-check me-3">
+                                    <input class="form-check-input" type="radio" name="idType" value="新式居留證">
+                                    <label class="form-check-label">新式居留證</label>
+                                </div>
+                                <div class="form-check me-3">
+                                    <input class="form-check-input" type="radio" name="idType" value="統一編號">
+                                    <label class="form-check-label">統一編號</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">性別</label>
+                            <div class="d-flex">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="gender" value="男" checked>
+                                    <label class="form-check-label">男</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="gender" value="女">
+                                    <label class="form-check-label">女</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">選擇出生縣市</label>
+                            <select class="form-select" id="birthCity">
+                                <option value="台北市">台北市</option>
+                                <option value="新北市">新北市</option>
+                                <option value="桃園市">桃園市</option>
+                                <option value="台中市">台中市</option>
+                                <option value="台南市">台南市</option>
+                                <option value="高雄市">高雄市</option>
+                                <option value="基隆市">基隆市</option>
+                                <option value="新竹市">新竹市</option>
+                                <option value="嘉義市">嘉義市</option>
+                                <option value="宜蘭縣">宜蘭縣</option>
+                                <option value="新竹縣">新竹縣</option>
+                                <option value="苗栗縣">苗栗縣</option>
+                                <option value="彰化縣">彰化縣</option>
+                                <option value="南投縣">南投縣</option>
+                                <option value="雲林縣">雲林縣</option>
+                                <option value="嘉義縣">嘉義縣</option>
+                                <option value="屏東縣">屏東縣</option>
+                                <option value="台東縣">台東縣</option>
+                                <option value="花蓮縣">花蓮縣</option>
+                                <option value="澎湖縣">澎湖縣</option>
+                                <option value="金門縣">金門縣</option>
+                                <option value="連江縣">連江縣</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-primary btn-lg" onclick="generateFakeIdentity()">產生假身分</button>
+                </div>
+            </div>
+
+            <!-- 右側區域：生成結果 -->
+            <div class="col-md-6">
+                <div id="output" class="card shadow p-4" style="display: none;">
+                    <h3 class="card-title text-center">生成結果</h3>
+                    <div id="outputContent" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const lastNames = ["陳", "林", "黃", "張", "李", "王", "吳", "劉", "蔡", "楊", "鄭", "許", "謝", "郭", "洪"];
+        const firstNames = ["嘉", "慧", "俊", "佳", "文", "怡", "雅", "志", "冠", "建", "宗", "育", "君", "萱", "柏"];
+        const emailDomains = ["gmail.com", "yahoo.com", "hotmail.com", "outlook.com"];
+        const cityToCode = {
+            "台北市": "A", "新北市": "F", "桃園市": "H", "台中市": "B", "台南市": "D",
+            "高雄市": "E", "基隆市": "C", "新竹市": "O", "嘉義市": "I", "宜蘭縣": "G",
+            "新竹縣": "J", "苗栗縣": "K", "彰化縣": "N", "南投縣": "M", "雲林縣": "P",
+            "嘉義縣": "Q", "屏東縣": "T", "台東縣": "V", "花蓮縣": "U", "澎湖縣": "X",
+            "金門縣": "W", "連江縣": "Z"
+        };
+
+        // 定義 getRandomItem 函式
+        function getRandomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        // 中英轉換
+        function chineseToPinyin(chineseName) {
+            const mapping = {
+                "陳": "Chen", "林": "Lin", "黃": "Huang", "張": "Chang", "李": "Li",
+                "王": "Wang", "吳": "Wu", "劉": "Liu", "蔡": "Tsai", "楊": "Yang",
+                "鄭": "Cheng", "許": "Hsu", "謝": "Hsieh", "郭": "Kuo", "洪": "Hung",
+                "嘉": "Jia", "慧": "Hui", "俊": "Jun", "佳": "Chia", "文": "Wen",
+                "怡": "Yi", "雅": "Ya", "志": "Zhi", "冠": "Guan", "建": "Jian",
+                "宗": "Zong", "育": "Yu", "君": "Jun", "萱": "Xuan", "柏": "Bo"
+            };
+
+            return chineseName
+                .split('') // 將名字拆分為單個字元
+                .map(char => mapping[char] || `[未知:${char}]`) // 如果字元有對應拼音，轉換；否則標記為「未知」
+                .join(''); // 將結果合併成字串
+        }
+
+        // 生成身份證字號
+        function generateIDNumber(gender = "男") {
+            const letters = "ABCDEFGHJKLMNPQRSTUVXYWZ"; // 排除 I 和 O
+            const weights = [1, 9, 8, 7, 6, 5, 4, 3, 2, 1]; // 權重
+            const genderCode = gender === "男" ? 1 : 2; // 男性為 1，女性為 2
+            // 從使用者選擇的縣市中取得地區代碼
+            const selectedCity = document.getElementById("birthCity").value || "台北市"; // 使用者選擇的縣市
+            const cityCode = cityToCode[selectedCity]; // 根據縣市取得對應的英文字母代碼
+
+            // 隨機生成後 7 碼數字
+            const body = Array.from({ length: 7 }, () => Math.floor(Math.random() * 10)).join("");
+
+            // 城市字母轉數值 (A=10, B=11, ...)
+            const cityValue = letters.indexOf(cityCode) + 10; // 城市字母對應數值
+            const cityDigits = [Math.floor(cityValue / 10), cityValue % 10]; // 拆分成兩位數
+
+            // 組成完整的 9 碼數字 (不含檢查碼)
+            const numberArray = [
+                cityDigits[0],
+                cityDigits[1],
+                genderCode,
+                ...body.split("").map(Number),
+            ];
+
+            // 計算檢查碼
+            const checksum = numberArray.reduce((acc, num, idx) => acc + num * weights[idx], 0);
+            const checkDigit = (10 - (checksum % 10)) % 10; // 檢查碼公式
+
+            // 組合完整 10 碼身分證字號
+            return `${cityCode}${genderCode}${body}${checkDigit}`;
+        }
+
+        // 生成新式居留證號碼
+        function generateNewResidentNumber() {
+            const letters = "ABCDEFGHJKLMNPQRSTUVXYWZ"; // 區域碼字母
+            const genderCode = getRandomItem(["8", "9"]); // 性別碼：8=男，9=女
+            const idTypeCode = getRandomItem(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]); // 身分碼
+            const serialNumber = Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)).join(""); // 6位流水號
+            // 從使用者選擇的縣市中取得地區代碼
+            const selectedCity = document.getElementById("birthCity").value || "台北市"; // 使用者選擇的縣市
+            const cityCode = cityToCode[selectedCity]; // 根據縣市取得對應的英文字母代碼
+
+            // 計算檢查碼
+            const weights = [1, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+            const cityValue = letters.indexOf(cityCode) + 10; // 區域碼對應數值
+            const cityDigits = [Math.floor(cityValue / 10), cityValue % 10];
+            const fullNumber = [cityDigits[0], cityDigits[1], Number(genderCode), Number(idTypeCode), ...serialNumber.split("").map(Number)];
+            const checksum = fullNumber.reduce((acc, num, idx) => acc + num * weights[idx], 0) % 10;
+            const checkDigit = (10 - checksum) % 10;
+
+            return `${cityCode}${genderCode}${idTypeCode}${serialNumber}${checkDigit}`;
+        }
+
+        // 生成舊式居留證號碼
+        function generateOldResidentNumber() {
+            const letters = "ABCDEFGHJKLMNPQRSTUVXYWZ"; // 區域碼字母
+            const idTypeGenderCode = getRandomItem(["A", "B", "C", "D"]); // 第2碼：性別碼
+            const body = Array.from({ length: 7 }, () => Math.floor(Math.random() * 10)).join(""); // 第3~9碼：流水號（7位數字）
+            // 從使用者選擇的縣市中取得地區代碼
+            const selectedCity = document.getElementById("birthCity").value || "台北市"; // 使用者選擇的縣市
+            const cityCode = cityToCode[selectedCity]; // 根據縣市取得對應的英文字母代碼
+
+            // 權重值
+            const weights = [1, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+
+            // 地區代碼轉換為對應數值（A=10, B=11, ..., Z=35）
+            const cityValue = letters.indexOf(cityCode) + 10; // A=10, B=11, ...
+            const cityDigits = [Math.floor(cityValue / 10), cityValue % 10]; // 拆分地區代碼數值為兩位數
+
+            // 主體流水碼轉換為數字陣列
+            const bodyDigits = body.split("").map(Number);
+
+            // 組成完整的數字陣列（不包含檢查碼）
+            const fullNumber = [
+                cityDigits[0], cityDigits[1], // 第1碼地區代碼數字
+                idTypeGenderCode.charCodeAt(0) - 65, // 第2碼性別碼數值，A=0, B=1, ..., D=3
+                ...bodyDigits // 第3~9碼流水碼數字
+            ];
+
+            // 計算加權總和
+            const checksum = fullNumber.reduce((acc, num, idx) => acc + num * weights[idx], 0);
+
+            // 計算檢查碼
+            const checkDigit = (10 - (checksum % 10)) % 10;
+
+            // 返回完整的舊式居留證號碼
+            return `${cityCode}${idTypeGenderCode}${body}${checkDigit}`;
+        }
+
+        // 統一編號生成
+        function generateUnifiedNumber() {
+            const weights = [1, 2, 1, 2, 1, 2, 4, 1]; // 權重數
+            const unifiedNumber = Array.from({ length: 8 }, () => Math.floor(Math.random() * 10)); // 隨機8位數字
+            const sum = unifiedNumber.reduce(
+                (acc, digit, idx) => acc + Math.floor((digit * weights[idx]) / 10) + ((digit * weights[idx]) % 10),
+                0
+            );
+
+            if (sum % 10 === 0 || (unifiedNumber[6] === 7 && (sum + 1) % 10 === 0)) {
+                return unifiedNumber.join('');
+            }
+            return generateUnifiedNumber(); // 若不符合規則，重新生成
+        }
+
+        // 生成生日
+        function generateBirthday() {
+            const startYear = 1960; // 設定最早年份
+            const endYear = 2005; // 設定最晚年份
+            const year = Math.floor(Math.random() * (endYear - startYear + 1)) + startYear; // 隨機生成年份
+            const month = Math.floor(Math.random() * 12) + 1; // 隨機生成月份
+            const day = Math.floor(Math.random() * 28) + 1; // 隨機生成日期，簡化為 28 天
+            return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`; // 格式化成 YYYY-MM-DD
+        }
+
+        // 計算保險年齡
+        function calculateAges(birthday) {
+            const birthDate = new Date(birthday);
+            const today = new Date();
+
+            // 計算實際年齡
+            let actualAge = today.getFullYear() - birthDate.getFullYear();
+            if (
+                today.getMonth() < birthDate.getMonth() ||
+                (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())
+            ) {
+                actualAge--;
+            }
+
+            // 計算保險年齡
+            let insuranceAge;
+            if (actualAge < 15) {
+                // 15歲以下的保險年齡
+                insuranceAge =
+                    today.getMonth() > birthDate.getMonth() ||
+                        (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate())
+                        ? actualAge + 1
+                        : actualAge;
+            } else {
+                // 15歲以上的保險年齡
+                insuranceAge =
+                    today.getMonth() > birthDate.getMonth() ||
+                        (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate())
+                        ? actualAge
+                        : actualAge + 1;
+            }
+
+            return { actualAge, insuranceAge };
+        }
+
+        // 生成假身分
+        function generateFakeIdentity() {
+            const idType = document.querySelector('input[name="idType"]:checked')?.value || "身分證";
+            const gender = document.querySelector('input[name="gender"]:checked')?.value || "男";
+            const birthCity = document.getElementById("birthCity")?.value || "台北市";
+
+            const lastName = getRandomItem(lastNames);
+            const firstName = getRandomItem(firstNames) + getRandomItem(firstNames);
+            const fullName = lastName + firstName;
+
+            const englishName = chineseToPinyin(lastName) + chineseToPinyin(firstName);
+            const email = `${englishName.toLowerCase()}${Math.floor(1000 + Math.random() * 9000)}@${getRandomItem(emailDomains)}`;
+
+            let idNumber;
+            if (idType === "身分證") {
+                idNumber = generateIDNumber(gender);
+            } else if (idType === "新式居留證") {
+                idNumber = generateNewResidentNumber();
+            } else if (idType === "舊式居留證") {
+                idNumber = generateOldResidentNumber();
+            } else if (idType === "統一編號") {
+                idNumber = generateUnifiedNumber();
+            }
+
+            // 生成生日
+            const birthday = generateBirthday();
+            const { actualAge, insuranceAge } = calculateAges(birthday); // 計算實際年齡和保險年齡
+
+            const phone = `09${Math.floor(10000000 + Math.random() * 90000000)}`;
+
+            const outputContent = `
+                <ul class="list-group">
+                    <li class="list-group-item"><strong>中文姓名：</strong>${fullName}</li>
+                    <li class="list-group-item"><strong>英文姓名：</strong>${englishName}</li>
+                    <li class="list-group-item"><strong>性別：</strong>${gender}</li>
+                    <li class="list-group-item"><strong>生日：</strong>${birthday}</li>
+                    <li class="list-group-item"><strong>實際年齡：</strong>${actualAge}</li>
+                    <li class="list-group-item"><strong>保險年齡：</strong>${insuranceAge}</li>
+                    <li class="list-group-item"><strong>Email：</strong>${email}</li>
+                    <li class="list-group-item"><strong>出生縣市：</strong>${birthCity}</li>
+                    <li class="list-group-item"><strong>證件類型：</strong>${idType}</li>
+                    <li class="list-group-item"><strong>證件號碼：</strong>${idNumber}</li>
+                    <li class="list-group-item"><strong>電話：</strong>${phone}</li>
+                </ul>
+            `;
+
+            document.getElementById("outputContent").innerHTML = outputContent;
+            document.getElementById("output").style.display = "block";
+        }
+    </script>
+</body>
+
+</html>

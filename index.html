@@ -327,6 +327,36 @@
 
             document.getElementById("outputContent").innerHTML = outputContent;
             document.getElementById("output").style.display = "block";
+
+            // 自動複製身份證號碼到剪貼簿
+            navigator.clipboard.writeText(idNumber).then(() => {
+                showTemporaryMessage(`證件號碼已自動複製：${idNumber}`);
+            }).catch(err => {
+                console.error("複製失敗：", err);
+            });
+        }
+
+        // 顯示提示訊息的小視窗
+        function showTemporaryMessage(message) {
+            const messageBox = document.createElement("div");
+            messageBox.style.position = "fixed";
+            messageBox.style.bottom = "20px";
+            messageBox.style.right = "20px";
+            messageBox.style.backgroundColor = "#4caf50";
+            messageBox.style.color = "white";
+            messageBox.style.padding = "10px 20px";
+            messageBox.style.borderRadius = "5px";
+            messageBox.style.boxShadow = "0 4px 6px rgba(0, 0, 0, 0.1)";
+            messageBox.style.zIndex = "1000";
+            messageBox.style.fontSize = "14px";
+            messageBox.textContent = message;
+
+            document.body.appendChild(messageBox);
+
+            // 2秒後自動消失
+            setTimeout(() => {
+                messageBox.remove();
+            }, 2000);
         }
     </script>
 </body>
